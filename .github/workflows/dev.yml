@@ -26,19 +26,26 @@ jobs:
         with:
           creds: ${{ secrets.AZ_CREDENTIALS }}
       
-      - name: Verify Azure login
+      - name: Login to ACR with Token
         run: |
-          az account show
-          echo "Logged in successfully"
+          ACR_LOGIN_SERVER=$(az acr show --name ${{ env.ACR_NAME }} --query loginServer -o tsv)
+          echo "ACR_LOGIN_SERVER=$ACR_LOGIN_SERVER" >> $GITHUB_ENV
+          
+          TOKEN=$(az acr login --name ${{ env.ACR_NAME }} --expose-token --query accessToken -o tsv)
+          echo $TOKEN | docker login $ACR_LOGIN_SERVER -u 00000000-0000-0000-0000-000000000000 --password-stdin
       
-      - name: Build and Push using ACR Build
+      - name: Build and Push Docker Image
         run: |
-          az acr build \
-            --registry ${{ env.ACR_NAME }} \
-            --image sampleapi/sampleapi:dev-${{ github.sha }} \
-            --image sampleapi/sampleapi:dev-latest \
-            --file SampleAPI/Dockerfile \
+          IMAGE_TAG="${{ env.ACR_LOGIN_SERVER }}/sampleapi/sampleapi"
+          
+          docker build \
+            -f SampleAPI/Dockerfile \
+            -t $IMAGE_TAG:dev-latest \
+            -t $IMAGE_TAG:dev-${{ github.sha }} \
             SampleAPI/
+          
+          docker push $IMAGE_TAG:dev-latest
+          docker push $IMAGE_TAG:dev-${{ github.sha }}
       
       - name: Set AKS Context
         uses: azure/aks-set-context@v3
@@ -74,7 +81,7 @@ jobs:
             k8s/base/deployment.yml
             k8s/base/service.yml
           images: |
-            ${{ env.ACR_NAME }}.azurecr.io/sampleapi/sampleapi:dev-${{ github.sha }}
+            ${{ env.ACR_LOGIN_SERVER }}/sampleapi/sampleapi:dev-${{ github.sha }}
       
       - name: Verify Deployment
         run: |
