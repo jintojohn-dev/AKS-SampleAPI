@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: sampleapi
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: sampleapi
@@ -25,22 +25,8 @@ spec:
             name: sampleapi-secrets
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "250m"
+            memory: "128Mi"
+            cpu: "100m"
           limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          failureThreshold: 3
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          failureThreshold: 3
+            memory: "256Mi"
+            cpu: "200m"
