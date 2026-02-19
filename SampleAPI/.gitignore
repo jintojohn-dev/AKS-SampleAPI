@@ -1,0 +1,53 @@
+# Visual Studio cache and settings
+.vs/
+.vscode/
+ECHO is on.
+# Build results
+bin/
+obj/
+Debug/
+Release/
+ECHO is on.
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+ECHO is on.
+# Logs
+*.log
+ECHO is on.
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+ECHO is on.
+# NuGet packages
+*.nupkg
+packages/
+*.snupkg
+ECHO is on.
+# Generated files
+*.dll
+*.exe
+*.pdb
+*.cache
+*.dbmdl
+ECHO is on.
+# Test results
+TestResults/
+*.coverage
+*.coveragexml
+ECHO is on.
+# Other tooling
+_ReSharper*/
+*.DotSettings.user
+*.idea/
+*.vsidx
+ECHO is on.
+# OS-specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
