@@ -26,22 +26,19 @@ jobs:
         with:
           creds: ${{ secrets.AZ_CREDENTIALS }}
       
-      - name: Log in to Azure Container Registry
+      - name: Verify Azure login
         run: |
-          az acr login --name ${{ env.ACR_NAME }}
+          az account show
+          echo "Logged in successfully"
       
-      - name: Build and Push Docker Image
+      - name: Build and Push using ACR Build
         run: |
-          IMAGE_TAG="${{ env.ACR_NAME }}.azurecr.io/sampleapi/sampleapi"
-          
-          docker build \
-            -f SampleAPI/Dockerfile \
-            -t $IMAGE_TAG:dev-latest \
-            -t $IMAGE_TAG:dev-${{ github.sha }} \
+          az acr build \
+            --registry ${{ env.ACR_NAME }} \
+            --image sampleapi/sampleapi:dev-${{ github.sha }} \
+            --image sampleapi/sampleapi:dev-latest \
+            --file SampleAPI/Dockerfile \
             SampleAPI/
-          
-          docker push $IMAGE_TAG:dev-latest
-          docker push $IMAGE_TAG:dev-${{ github.sha }}
       
       - name: Set AKS Context
         uses: azure/aks-set-context@v3
@@ -58,15 +55,14 @@ jobs:
           kubectl create configmap sampleapi-config \
             --from-literal=ASPNETCORE_ENVIRONMENT=Development \
             --from-literal=LOG_LEVEL=Debug \
-            --from-literal=API_BASE_URL=${{ secrets.DEV_API_BASE_URL }} \
             --namespace=${{ env.NAMESPACE }} \
             --dry-run=client -o yaml | kubectl apply -f -
       
       - name: Create Secrets
         run: |
           kubectl create secret generic sampleapi-secrets \
-            --from-literal=DATABASE_CONNECTION_STRING="${{ secrets.DEV_DATABASE_CONNECTION_STRING }}" \
-            --from-literal=API_KEY="${{ secrets.DEV_API_KEY }}" \
+            --from-literal=DATABASE_CONNECTION_STRING="Server=localhost" \
+            --from-literal=API_KEY="dev-key" \
             --namespace=${{ env.NAMESPACE }} \
             --dry-run=client -o yaml | kubectl apply -f -
       
