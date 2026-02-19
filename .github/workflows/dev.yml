@@ -35,10 +35,10 @@ jobs:
           IMAGE_TAG="${{ env.ACR_NAME }}.azurecr.io/sampleapi/sampleapi"
           
           docker build \
-            -f Dockerfile \
+            -f SampleAPI/Dockerfile \
             -t $IMAGE_TAG:dev-latest \
             -t $IMAGE_TAG:dev-${{ github.sha }} \
-            .
+            SampleAPI/
           
           docker push $IMAGE_TAG:dev-latest
           docker push $IMAGE_TAG:dev-${{ github.sha }}
@@ -77,7 +77,6 @@ jobs:
           manifests: |
             k8s/base/deployment.yml
             k8s/base/service.yml
-            k8s/overlays/dev/kustomization.yml
           images: |
             ${{ env.ACR_NAME }}.azurecr.io/sampleapi/sampleapi:dev-${{ github.sha }}
       
